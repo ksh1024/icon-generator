@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>wow</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h3>이미지 생성기</h3>
+  <p>텍스트를 입력하면 고유한 이미지를 생성합니다.</p>
+  <form id="generate-form" th:action="@{/generate}" method="post">
+    <input id="text-input" type="text" name="text" placeholder="아무 텍스트나 입력하세요">
+    <button type="submit">생성하기</button>
+  </form>
+  <div th:if="${imgUrl}" class="result-img">
+    <h4>생성된 이미지</h4>
+    <p>입력 텍스트: <b th:text="${inputText}"></b></p>
+    <img th:src="${imgUrl}" alt="생성된 이미지">
+  </div>
+</div>
+</body>
+<script>
+  $(function() {
+    $('#generate-form').on('submit', function(event) {
+      const textValue = $('#text-input').val().trim();
+      if (textValue === '') {
+        // 폼의 기본 제출 막기
+        event.preventDefault();
+        // 0.5초 후에 'error' 클래스를 제거 (메소드 체이닝)
+        $('#text-input').addClass('error').delay(500).queue(function() {
+          $(this).removeClass('error').dequeue();
+        });
+      }
+    });
+  });
+</script>
+<style>
+  body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+  .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+  input[type="text"] { width: 70%; padding: 10px; font-size: 16px; }
+  button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  .result-img { margin-top: 30px; border: 2px solid #333; }
+  button:hover { background-color: #0056b3; }
+  input.error {border-color: #dc3545;animation: shake 0.5s;}
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+    20%, 40%, 60%, 80% { transform: translateX(3px); }
+  }
+</style>
+</html>
