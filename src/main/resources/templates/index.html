@@ -6,22 +6,31 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <h3>이미지 생성기</h3>
-  <p>텍스트를 입력하면 고유한 이미지를 생성합니다.</p>
-  <form id="generate-form">
-    <input id="text-input" type="text" name="text" placeholder="아무 텍스트나 입력하세요">
-    <button id="generate-btn" type="submit">생성하기</button>
-  </form>
-  <div id="result-area">
-    <h4>생성된 이미지</h4>
-    <p>입력 텍스트: <b id="result-text"></b></p>
-    <img id="result-img" src="" alt="생성된 이미지">
+<div class="main-wrapper">
+  <div class="container">
+    <h3>이미지 생성기</h3>
+    <p>텍스트를 입력하면 고유한 이미지를 생성합니다.</p>
+    <form id="generate-form">
+      <input id="text-input" type="text" name="text" placeholder="아무 텍스트나 입력하세요">
+      <button id="generate-btn" type="submit">생성하기</button>
+    </form>
+    <div id="result-area">
+      <h4>생성된 이미지</h4>
+      <p>입력 텍스트: <b id="result-text"></b></p>
+      <img id="result-img" src="" alt="생성된 이미지">
+    </div>
+    <div id="toast-noti" class="toast"></div>
   </div>
-  <div id="toast-noti" class="toast"></div>
+  <div id="history-panel">
+    <h3>요청 기록</h3>
+    <ol id="history-list"></ol>
+  </div>
 </div>
 </body>
 <script>
+  let requestHistory = []; // 요청 기록을 저장할 배열
+  const MAX_HISTORY_SIZE = 10; // 10개까지 기록
+
   function showToast(message) {
     const toast = $('#toast-noti');
     toast.text(message);
@@ -30,6 +39,17 @@
     setTimeout(function() {
       toast.removeClass('show');
     }, 3000);
+  }
+
+  // 요청 기록 목록을 화면에 다시 그려주는 함수
+  function updateHistoryView() {
+    const historyList = $('#history-list');
+    historyList.empty(); // 기존 목록을 모두 비움
+    requestHistory.forEach(item => {
+      // 각 항목을 <li> 태그로 만들어 목록에 추가
+      // <li>에 data-text 속성을 추가하여 클릭 시 값을 쉽게 가져올 수 있도록 함
+      historyList.append(`<li data-text="${item}">${item}</li>`);
+    });
   }
 
   $(function() {
@@ -54,7 +74,7 @@
           responseType: 'blob'
         }
       }).done(function(data) {
-        // 받은 blob 데이터를 이미지 URL로 변환
+        // 받은 blob 데이터를 이미지 URL로 변환 // 브라우저 캐시에 저장됨
         const urlCreator = window.URL;
         const blobUrl = urlCreator.createObjectURL(data);
 
@@ -62,16 +82,39 @@
         $('#result-img').attr('src', blobUrl);
         $('#result-area').fadeIn();
 
+        // 배열의 맨 앞에 새로운 요청을 추가
+        requestHistory.unshift(textValue);
+        // Set을 이용해 중복된 항목을 제거하고 다시 배열로 만듦
+        requestHistory = [...new Set(requestHistory)];
+        // 최대 기록 개수 유지
+        if (requestHistory.length > MAX_HISTORY_SIZE) {
+          requestHistory.pop(); // 가장 오래된 항목 제거
+        }
+        updateHistoryView();
+
       }).fail(function(jqXHR, textStatus, errorThrown) {
         console.error("AJAX Error: ", textStatus, errorThrown);
         showToast("이미지 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
       });
     });
+
+    $('#history-list').on('click', 'li', function() {
+      const clickedText = $(this).data('text'); // data-text 속성에서 값을 가져옴
+      $('#text-input').val(clickedText); // 입력창에 텍스트 채우기
+      $('#generate-form').submit(); // form submit 이벤트를 발생시켜 다시 생성
+    });
   });
 </script>
 <style>
-  body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-  .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+  body { font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+  .main-wrapper {display: flex;justify-content: center;align-items: flex-start;gap: 20px;max-width: 900px;margin: auto;}
+  .container {flex: 2;max-width: 500px;margin: 0;padding: 20px;border: 1px solid #ddd;border-radius: 8px;}
+  #history-panel {flex: 1;text-align: left;padding: 20px;border: 1px solid #ddd;border-radius: 8px;height: fit-content;}
+  #history-panel h3 { margin-top: 0; text-align: center; }
+  #history-list { list-style-type: decimal; padding-left: 20px; margin: 0; }
+  #history-list li { margin-bottom: 8px; cursor: pointer; color: #007bff; word-break: break-all; }
+  #history-list li:hover { text-decoration: underline; }
+
   input[type="text"] { width: 70%; padding: 10px; font-size: 16px; }
   button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
   #result-img { margin-top: 30px; border: 2px solid #333; }
