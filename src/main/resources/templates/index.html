@@ -9,29 +9,34 @@
 <div class="container">
   <h3>이미지 생성기</h3>
   <p>텍스트를 입력하면 고유한 이미지를 생성합니다.</p>
-  <form id="generate-form" th:action="@{/generate}" method="post">
+  <form id="generate-form">
     <input id="text-input" type="text" name="text" placeholder="아무 텍스트나 입력하세요">
-    <button type="submit">생성하기</button>
+    <button id="generate-btn" type="submit">생성하기</button>
   </form>
-  <div th:if="${imgUrl}" class="result-img">
+  <div id="result-area">
     <h4>생성된 이미지</h4>
-    <p>입력 텍스트: <b th:text="${inputText}"></b></p>
-    <img th:src="${imgUrl}" alt="생성된 이미지">
+    <p>입력 텍스트: <b id="result-text"></b></p>
+    <img id="result-img" src="" alt="생성된 이미지">
   </div>
 </div>
 </body>
 <script>
   $(function() {
-    $('#generate-form').on('submit', function(event) {
+    $('#generate-form').on('submit', function() {
+      event.preventDefault();
       const textValue = $('#text-input').val().trim();
+
       if (textValue === '') {
-        // 폼의 기본 제출 막기
-        event.preventDefault();
-        // 0.5초 후에 'error' 클래스를 제거 (메소드 체이닝)
         $('#text-input').addClass('error').delay(500).queue(function() {
           $(this).removeClass('error').dequeue();
         });
+        return;
       }
+      const imgUrl = '/generate/' + encodeURIComponent(textValue);
+      $('#result-text').text(textValue);
+      $('#result-img').attr('src', imgUrl);
+
+      $('#result-area').fadeIn();
     });
   });
 </script>
@@ -40,13 +45,10 @@
   .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
   input[type="text"] { width: 70%; padding: 10px; font-size: 16px; }
   button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-  .result-img { margin-top: 30px; border: 2px solid #333; }
+  #result-img { margin-top: 30px; border: 2px solid #333; }
   button:hover { background-color: #0056b3; }
   input.error {border-color: #dc3545;animation: shake 0.5s;}
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-    20%, 40%, 60%, 80% { transform: translateX(3px); }
-  }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); } 20%, 40%, 60%, 80% { transform: translateX(3px); } }
+  #result-area {margin-top: 30px;border: 2px solid #333;padding: 15px;border-radius: 8px;background-color: #f8f9fa;display: none;}
 </style>
 </html>
