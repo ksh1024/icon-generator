@@ -29,6 +29,9 @@ public class GenerateIconController {
             byte[] imgData = generateIconService.generateIcon(text);
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_PNG);
+            if(text.equals("error")) { // test용
+                throw new Exception();
+            }
             return new ResponseEntity<>(imgData, headers, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

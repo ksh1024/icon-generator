@@ -18,25 +18,54 @@
     <p>입력 텍스트: <b id="result-text"></b></p>
     <img id="result-img" src="" alt="생성된 이미지">
   </div>
+  <div id="toast-noti" class="toast"></div>
 </div>
 </body>
 <script>
-  $(function() {
-    $('#generate-form').on('submit', function() {
-      event.preventDefault();
-      const textValue = $('#text-input').val().trim();
+  function showToast(message) {
+    const toast = $('#toast-noti');
+    toast.text(message);
+    toast.addClass('show');
 
+    setTimeout(function() {
+      toast.removeClass('show');
+    }, 3000);
+  }
+
+  $(function() {
+    $('#generate-form').on('submit', function(event) {
+      event.preventDefault();
+
+      const textValue = $('#text-input').val().trim();
       if (textValue === '') {
         $('#text-input').addClass('error').delay(500).queue(function() {
           $(this).removeClass('error').dequeue();
         });
         return;
       }
-      const imgUrl = '/generate/' + encodeURIComponent(textValue);
-      $('#result-text').text(textValue);
-      $('#result-img').attr('src', imgUrl);
 
-      $('#result-area').fadeIn();
+      const encodedText = encodeURIComponent(textValue);
+      const imageUrl = '/generate/' + encodedText;
+
+      $.ajax({
+        url: imageUrl,
+        method: 'GET',
+        xhrFields: {
+          responseType: 'blob'
+        }
+      }).done(function(data) {
+        // 받은 blob 데이터를 이미지 URL로 변환
+        const urlCreator = window.URL;
+        const blobUrl = urlCreator.createObjectURL(data);
+
+        $('#result-text').text(textValue);
+        $('#result-img').attr('src', blobUrl);
+        $('#result-area').fadeIn();
+
+      }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error("AJAX Error: ", textStatus, errorThrown);
+        showToast("이미지 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      });
     });
   });
 </script>
@@ -50,5 +79,7 @@
   input.error {border-color: #dc3545;animation: shake 0.5s;}
   @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); } 20%, 40%, 60%, 80% { transform: translateX(3px); } }
   #result-area {margin-top: 30px;border: 2px solid #333;padding: 15px;border-radius: 8px;background-color: #f8f9fa;display: none;}
+  .toast {visibility: hidden;min-width: 250px;background-color: #dc3545;color: #fff;text-align: center;border-radius: 4px;padding: 16px;position: fixed;z-index: 1;left: 50%;margin-top: 30px;transform: translateX(-50%);opacity: 0;transition: opacity 0.5s, visibility 0.5s;}
+  .toast.show {visibility: visible;opacity: 1;}
 </style>
 </html>
