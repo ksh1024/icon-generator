@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+#text-input:focus {
+    outline: none;
+    border-color: #64acff;
+    box-shadow: 0 0 15px rgba(100, 172, 255, 0.5);
+}
+.container0 {
+    position: relative; /* 자식 요소의 absolute 포지셔닝 기준점 */
+    width: 80%;
+    max-width: 960px; /* main-wrapper와 동일한 너비 */
+}
+#toast-notification {
+    position: absolute;
+    left: 20px;
+    bottom: -80px; /* 평소에는 컨테이너보다 80px 아래에 숨어있음 */
+
+    background: rgba(220, 53, 69, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(220, 53, 69, 0.7);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 12px;
+    z-index: 10;
+    min-width: 250px;
+
+    /* 초기 상태: 숨김 & 왼쪽 화면 밖 */
+    opacity: 0;
+    transform: translateX(-120%);
+    visibility: hidden;
+
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#toast-notification.show {
+    opacity: 1;
+    transform: translateX(0); /* 왼쪽에서 날아오도록 */
+    visibility: visible;
+}
+
+.ripple-btn {
+    position: relative; /* 자식 요소(.ripple)의 기준점 */
+    overflow: hidden;   /* 원이 버튼 밖으로 나가지 않도록 함 */
+}
+.ripple {
+    position: absolute;
+    border-radius: 50%; /* 원 모양 */
+    background-color: rgba(255, 255, 255, 0.6); /* 반투명 흰색 물결 */
+    transform: scale(0); /* 처음엔 보이지 않는 점 */
+    animation: ripple-effect 0.6s linear;
+}
+@keyframes ripple-effect {
+    to {
+        transform: scale(4); /* 4배 커짐 */
+        opacity: 0;
+    }
+}
+
+.gradient-btn {
+    position: relative; /* 자식 pseudo-element의 기준점 */
+    overflow: hidden;
+    background: linear-gradient(45deg, #a2facf, #64acff);
+}
+
+/* 마우스를 올렸을 때 나타날 빛 효과를 위한 가상 요소 */
+.gradient-btn::before {
+    content: '';
+    position: absolute;
+    /* JS에서 전달받을 변수를 사용해 위치를 동적으로 설정 */
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    width: 0;
+    height: 0;
+    /* 원형 그라데이션으로 빛 효과 생성 */
+    background: radial-gradient(circle closest-side, #a2facf, transparent);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+    opacity: 0;
+}
+
+/* 마우스를 올렸을 때 빛 효과를 활성화 */
+.gradient-btn:hover::before {
+    width: 300px;
+    height: 300px;
+    opacity: 1;
+}
