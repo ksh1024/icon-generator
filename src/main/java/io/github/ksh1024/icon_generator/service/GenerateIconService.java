@@ -24,7 +24,9 @@ public class GenerateIconService {
     private final int IMAGE_SIZE = GRID_SIZE * PIXEL_SIZE;
 
     @Transactional
-    public byte[] generateIcon(String text) throws NoSuchAlgorithmException, IOException {
+    public byte[] generateIcon(String text, String format) throws NoSuchAlgorithmException, IOException {
+        // png 형식 기본
+        final String imageFormat = (format != null && (format.equalsIgnoreCase("jpg") || format.equalsIgnoreCase("jpeg"))) ? "jpeg" : "png";
         // 1. DB에서 캐시된 이미지가 있는지 먼저 확인
         Optional<GenerateIconCache> cached = repository.findByInputText(text);
         if (cached.isPresent()) {
@@ -64,11 +66,12 @@ public class GenerateIconService {
 
         // 7. 생성된 이미지를 byte 배열로 변환
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", baos);
+        ImageIO.write(image, imageFormat, baos);
         byte[] imageData = baos.toByteArray();
         // 8. DB에 새로 생성한 이미지 캐싱
         repository.save(new GenerateIconCache(text, imageData));
 
         return imageData;
     }
+
 }

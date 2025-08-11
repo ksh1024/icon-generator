@@ -29,6 +29,12 @@
         <h2 class="text-xl font-bold">Generated Icon</h2>
         <p class="text-gray-400">Input Text: <b id="result-text" class="text-white"></b></p>
         <img id="result-image" src="" alt="Generated Identicon" class="mt-4 rounded-lg shadow-lg mx-auto">
+        <div class="mt-6 flex justify-center gap-4">
+          <a id="download-png" href="#" download class="px-5 py-2 text-sm font-semibold rounded-md bg-green-600 hover:bg-green-700 text-white transition-colors duration-300">
+            PNG Download</a>
+          <a id="download-jpg" href="#" download class="px-5 py-2 text-sm font-semibold rounded-md bg-sky-600 hover:bg-sky-700 text-white transition-colors duration-300">
+            JPG Download</a>
+        </div>
       </div>
     </div>
     <div id="history-panel" class="flex-1 p-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl shadow-black/40 h-fit">
@@ -88,6 +94,10 @@
                 const blobUrl = (window.URL || window.webkitURL).createObjectURL(data);
                 $('#result-text').text(textValue);
                 $('#result-image').attr('src', blobUrl);
+
+                $('#download-png').attr('href', `/download/${encodedText}?format=png`);
+                $('#download-jpg').attr('href', `/download/${encodedText}?format=jpg`);
+
                 $('#result-area').fadeIn();
 
                 // 배열의 맨 앞에 새로운 요청을 추가
