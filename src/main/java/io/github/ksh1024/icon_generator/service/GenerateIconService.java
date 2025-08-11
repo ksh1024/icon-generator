@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +23,11 @@ public class GenerateIconService {
     private final int GRID_SIZE = 5;
     private final int PIXEL_SIZE = 50;
     private final int IMAGE_SIZE = GRID_SIZE * PIXEL_SIZE;
+
+    @Transactional(readOnly = true) // readOnly=true 옵션으로 성능 최적화
+    public List<GenerateIconCache> getAll() {
+        return repository.findAll();
+    }
 
     @Transactional
     public byte[] generateIcon(String text, String format) throws NoSuchAlgorithmException, IOException {

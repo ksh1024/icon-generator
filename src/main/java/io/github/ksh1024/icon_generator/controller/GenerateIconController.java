@@ -1,5 +1,6 @@
 package io.github.ksh1024.icon_generator.controller;
 
+import io.github.ksh1024.icon_generator.entity.GenerateIconCache;
 import io.github.ksh1024.icon_generator.service.GenerateIconService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -66,4 +68,25 @@ public class GenerateIconController {
         }
     }
 
+    @GetMapping("/admin/history")
+    public ResponseEntity<String> printHistory() {
+        System.out.println("\n===== 모든 생성 기록 조회 =====");
+
+        List<GenerateIconCache> historyList = generateIconService.getAll();
+        if (historyList.isEmpty()) {
+            System.out.println("-> 저장된 기록이 없습니다.");
+        } else {
+            System.out.println("-> 총 " + historyList.size() + "개의 기록을 조회했습니다.");
+            for (GenerateIconCache cache : historyList) {
+                System.out.printf("  - ID: %d, Input: '%s', Created: %s%n",
+                        cache.getId(),
+                        cache.getInputText(),
+                        cache.getRegDnt());
+            }
+        }
+        System.out.println("=====================================\n");
+
+        // 브라우저에는 간단한 성공 메시지만 표시
+        return ResponseEntity.ok("모든 기록을 서버 콘솔에 출력했습니다.");
+    }
 }
